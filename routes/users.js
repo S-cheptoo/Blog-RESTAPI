@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/User");
+const Post = require("../models/Post");
 const bcrypt = require("bcrypt");
 
 //UPDATE
@@ -10,9 +11,11 @@ router.put("/:id", async (req, res)=>{
             req.body.password = await bcrypt.hash(req.body.password, salt);
         }
         try {
-            const updatedUser = await User.findByIdAndUpdate(req.params.id, {
+            const updatedUser = await User.findByIdAndUpdate
+            (
+                req.params.id, {
                 $set:req.body,
-            });
+            },{new:true});
                 res.status(200).json(updatedUser);
         }catch(err){
             //respond with status 500 and return error
@@ -24,6 +27,25 @@ router.put("/:id", async (req, res)=>{
 });
 
 //DELETE
+router.delete("/:id", async (req, res)=>{
+    if(req.body.userId === req.params.id){
+        try{
+            const user =await User.findById(req.params.id);
+            try {
+                await Post.deleteMany({ username: user.username});
+                await User.findByIdAndDelete(req.params.id)
+                res.status(200).json("User has been deleted!");
+            }catch(err){
+                //respond with status 500 and return error
+                res.status(500).json(err);
+            }
+        } catch (err){
+            res.status(404).json("User not found!");
+        }
+    } else{
+        res.status(401).json("You can only delete your account!");
+    }
+});
 
 
 module.exports = router;
