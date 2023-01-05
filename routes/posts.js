@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/User");
 const Post = require("../models/Post");
-const bcrypt = require("bcrypt");
 
 //CREATE POST
 router.post("/:id", async (req, res)=>{
@@ -81,7 +80,7 @@ router.get("/", async (req, res) => {
                 $in:[catName]
             }})
         } else {
-            posts = Post.find();
+            posts = await Post.find();
         }
         res.status(200).json(posts);
     } catch(err){
